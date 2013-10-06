@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ICD Search</title>
+  <script src="js/zepto.min.js"></script>
+</head>
+<body>
+  <h1>ICD-Mapping</h1>
+  <p>Parse ICD9 and ICD10 to a relational database, set up a form to search and convert.</p>
+  <div class="search-box">
+    <input type="text" id="icd-9" placeholder="ICD-9 Code"><button class="icd-9-search">Search</button>
+    <input type="text" id="icd-10" placeholder="ICD-10 Code"><button class="icd-10-search">Search</button>
+  </div>
+  <div class="result"></div>
+  <script>
+    $('.icd-9-search').click(function(e){
+      e.preventDefault();
+      var icd_9 = $('#icd-9').val();
+      $.ajax({
+        type: 'GET',
+        url: '/icd/9/'+icd_9,
+        dataType: 'json',
+        timeout: 300,
+        context: $('.result'),
+        success: function(data){
+          $('.result').html('');
+          var tmp = "";
+          for (var i = data.length - 1; i >= 0; i--) {
+            tmp = "<div>";
+            tmp += "<span class='code'>" + data[i].icd_10_code + "</span> ";
+            tmp += "<span class='desc'>" + data[i].long_description + "</span>";
+            $('.result').append(tmp+'<div>');
+          };
+        },
+        error: function(xhr, type){
+          alert('Ajax error!');
+        }
+      })
+    });
+  </script>
+</body>
+</html>

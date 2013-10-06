@@ -1,0 +1,12 @@
+{
+  "name": "ICD-Mapping",
+  "description": "Parse ICD9 and ICD10 to a relational database, set up a form to search and convert.",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "mysql": "2.x",
+    "line-reader": "0.2.x",
+    "express": "3.x",
+    "ejs": "0.8.x"
+  }
+}
