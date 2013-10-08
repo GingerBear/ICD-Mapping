@@ -24,7 +24,7 @@ connection.connect();
 
 app.get('/icd/9', function(req, res) {
 
-  var sql = "SELECT icd9_icd10_map.icd_9_code, icd_10.icd_10_code, short_description, long_description, if_header FROM icd9_icd10_map, icd_10 WHERE " + 
+  var sql = "SELECT icd9_icd10_map.icd_9_code, icd_10.icd_10_code, short_description, long_description AS description, if_header FROM icd9_icd10_map, icd_10 WHERE " + 
             "icd9_icd10_map.icd_10_code = icd_10.icd_10_code AND " + 
             "icd_9_code = " + (req.query.icd_9 || "''");
 
@@ -33,9 +33,14 @@ app.get('/icd/9', function(req, res) {
   connection.query(sql, function(err, rows, fields) {
     if (err) throw err;
     if (rows.length > 0) {
-      res.json(rows);
+      res.json({
+        rows: rows,
+        empty: false
+      });
     }else{
-      res.json({});
+      res.json({
+        empty: true
+      });
     };
   });
 
@@ -52,9 +57,14 @@ app.get('/icd/10', function(req, res) {
   connection.query(sql, function(err, rows, fields) {
     if (err) throw err;
     if (rows.length > 0) {
-      res.json(rows);
+      res.json({
+        rows: rows,
+        empty: false
+      });
     }else{
-      res.json({});
+      res.json({
+        empty: true
+      });
     };
   });
 

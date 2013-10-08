@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>ICD Search</title>
-  <script src="js/zepto.min.js"></script>
   <style>
     .search-box {
       float: left;
@@ -16,7 +15,6 @@
       padding: 5px;
       border: 1px solid #ccc;
       float: left;
-      width: 400px;
     }
   </style>
 </head>
@@ -35,76 +33,69 @@
     <h3>Result:</h3>
     <div class="result"></div>
   </div>
-  <script>
-    $('.icd-9-search').click(function(e){
-      e.preventDefault();
-      $('.result').html('Loading...');
-      var icd_9 = $('#icd-9').val();
-      $.ajax({
-        type: 'GET',
-        url: '/icd/9',
-        data: {
-          icd_9: icd_9
-        },
-        dataType: 'json',
-        timeout: 300,
-        context: $('.result'),
-        success: function(data){
-          if (data.length > 0) {            
-            $('.result').html('');
-            var tmp = "";
-            for (var i = data.length - 1; i >= 0; i--) {
-              tmp = "<div>";
-              tmp += "<span class='code'>" + data[i].icd_9_code + "</span> ";
-              tmp += "<span class='code'>" + data[i].icd_10_code + "</span> ";
-              tmp += "<span class='desc'>" + data[i].long_description + "</span>";
-              $('.result').append(tmp+'<div>');
-            };
-          }else{
-            $('.result').html('No Result');
-          }
-        },
-        error: function(xhr, type){
-          console.log(xhr);
-          alert('Ajax error!');
-        }
-      })
-    });
+  <script class="icd-9-tpl" type="data/template">
+    <table>
+      <tr><th>ICD-9 Code</th><th>ICD-10 Code</th><th>Description</th></tr>
+      {{#rows}}
+        <tr><td>{{icd_9_code}}</td><td>{{icd_10_code}}</td><td>{{{description}}}</td></tr>
+      {{/rows}}
+      {{#empty}}
+        <tr><td rowspan=3>No Result.</td></tr>
+      {{/empty}}
+    </table>
+  </script>
 
-    $('.icd-10-search').click(function(e){
-      e.preventDefault();
-      $('.result').html('Loading...');
-      var icd_10 = $('#icd-10').val();
-      $.ajax({
-        type: 'GET',
-        url: '/icd/10',
-        data: {
-          icd_10: icd_10
-        },
-        dataType: 'json',
-        timeout: 300,
-        context: $('.result'),
-        success: function(data){
-          if (data.length > 0) {            
-            $('.result').html('');
-            var tmp = "";
-            for (var i = data.length - 1; i >= 0; i--) {
-              tmp = "<div>";
-              tmp += "<span class='code'>" + data[i].icd_9_code + "</span> ";
-              tmp += "<span class='code'>" + data[i].icd_10_code + "</span> ";
-              tmp += "<span class='desc'>" + data[i].description + "</span>";
-              $('.result').append(tmp+'<div>');
-            };
-          }else{
-            $('.result').html('No Result');
+  <script type="text/javascript" src="js/sea.js"></script>
+  <script>
+    seajs.config({
+      base: "./js/",
+      alias: {
+        "zepto": "zepto.min.js",
+        "mustache": "mustache.js"
+      }
+    });
+    
+    seajs.use(['zepto','mustache'], function() {
+
+      $('.icd-9-search').bind('click', function(e){
+        e.preventDefault();
+        $('.result').html('Loading...');
+        var icd_9 = $('#icd-9').val();
+        $.ajax({
+          type: 'GET',
+          url: '/icd/9',
+          data: { icd_9: icd_9 },
+          dataType: 'json',
+          success: function(data){
+            var el = Mustache.render($('.icd-9-tpl').text(), data);
+            $('.result').html(el);
+          },
+          error: function(xhr, type){
+            alert('Ajax error!');
           }
-        },
-        error: function(xhr, type){
-          console.log(xhr);
-          alert('Ajax error!');
-        }
-      })
+        });
+      });
+
+      $('.icd-10-search').bind('click', function(e){
+        e.preventDefault();
+        $('.result').html('Loading...');
+        var icd_10 = $('#icd-10').val();
+        $.ajax({
+          type: 'GET',
+          url: '/icd/10',
+          data: { icd_10: icd_10 },
+          dataType: 'json',
+          success: function(data){
+            var el = Mustache.render($('.icd-9-tpl').text(), data);
+            $('.result').html(el);
+          },
+          error: function(xhr, type){
+            alert('Ajax error!');
+          }
+        });
+      });
     });
   </script>
+
 </body>
 </html>
