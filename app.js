@@ -1,7 +1,8 @@
-var express = require('express');
-var mysql   = require('mysql');
-var path   = require('path');
-var app     = express();
+var express = require('express'),
+    mysql   = require('mysql'),
+    path    = require('path'),
+    app     = express();
+
 app.configure(function() {
     app.use(express.static(path.join(__dirname, 'public')));
     app.use(express.bodyParser());
@@ -21,20 +22,40 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-app.get('/icd/9/:code', function(req, res) {
-  if(req.params.code.length < 0) {
-    res.statusCode = 404;
-    return res.send('Error 404: Invalid Code');
-  }
+app.get('/icd/9', function(req, res) {
 
-  var sql = "SELECT icd_10.icd_10_code, short_description, long_description, if_header FROM icd9_icd10_map, icd_10 WHERE " + 
+  var sql = "SELECT icd9_icd10_map.icd_9_code, icd_10.icd_10_code, short_description, long_description, if_header FROM icd9_icd10_map, icd_10 WHERE " + 
             "icd9_icd10_map.icd_10_code = icd_10.icd_10_code AND " + 
-            "icd_9_code = " + req.params.code;
+            "icd_9_code = " + (req.query.icd_9 || "''");
+
+  console.log(sql);
 
   connection.query(sql, function(err, rows, fields) {
-
-    res.json(rows);
     if (err) throw err;
+    if (rows.length > 0) {
+      res.json(rows);
+    }else{
+      res.json({});
+    };
+  });
+
+});
+
+app.get('/icd/10', function(req, res) {
+
+  var sql = "SELECT icd9_icd10_map.icd_10_code, icd_9.icd_9_code, description FROM icd9_icd10_map, icd_9 WHERE " + 
+            "icd9_icd10_map.icd_9_code = icd_9.icd_9_code AND " + 
+            "icd_10_code = " + ("'" + req.query.icd_10 + "'" || "''");
+
+  console.log(sql);
+
+  connection.query(sql, function(err, rows, fields) {
+    if (err) throw err;
+    if (rows.length > 0) {
+      res.json(rows);
+    }else{
+      res.json({});
+    };
   });
 
 });

@@ -4,36 +4,103 @@
   <meta charset="UTF-8">
   <title>ICD Search</title>
   <script src="js/zepto.min.js"></script>
+  <style>
+    .search-box {
+      float: left;
+      width: 250px;
+    }
+    .result-box h3 {
+      margin: 0;
+    }
+    .result-box {
+      padding: 5px;
+      border: 1px solid #ccc;
+      float: left;
+      width: 400px;
+    }
+  </style>
 </head>
 <body>
   <h1>ICD-Mapping</h1>
   <p>Parse ICD9 and ICD10 to a relational database, set up a form to search and convert.</p>
   <div class="search-box">
-    <input type="text" id="icd-9" placeholder="ICD-9 Code"><button class="icd-9-search">Search</button>
-    <input type="text" id="icd-10" placeholder="ICD-10 Code"><button class="icd-10-search">Search</button>
+    <form action="">
+      <input type="text" id="icd-9" placeholder="ICD-9 Code"><button class="icd-9-search">Search</button>
+    </form>
+    <form action="">
+      <input type="text" id="icd-10" placeholder="ICD-10 Code"><button class="icd-10-search">Search</button>
+    </form>
   </div>
-  <div class="result"></div>
+  <div class="result-box">
+    <h3>Result:</h3>
+    <div class="result"></div>
+  </div>
   <script>
     $('.icd-9-search').click(function(e){
       e.preventDefault();
+      $('.result').html('Loading...');
       var icd_9 = $('#icd-9').val();
       $.ajax({
         type: 'GET',
-        url: '/icd/9/'+icd_9,
+        url: '/icd/9',
+        data: {
+          icd_9: icd_9
+        },
         dataType: 'json',
         timeout: 300,
         context: $('.result'),
         success: function(data){
-          $('.result').html('');
-          var tmp = "";
-          for (var i = data.length - 1; i >= 0; i--) {
-            tmp = "<div>";
-            tmp += "<span class='code'>" + data[i].icd_10_code + "</span> ";
-            tmp += "<span class='desc'>" + data[i].long_description + "</span>";
-            $('.result').append(tmp+'<div>');
-          };
+          if (data.length > 0) {            
+            $('.result').html('');
+            var tmp = "";
+            for (var i = data.length - 1; i >= 0; i--) {
+              tmp = "<div>";
+              tmp += "<span class='code'>" + data[i].icd_9_code + "</span> ";
+              tmp += "<span class='code'>" + data[i].icd_10_code + "</span> ";
+              tmp += "<span class='desc'>" + data[i].long_description + "</span>";
+              $('.result').append(tmp+'<div>');
+            };
+          }else{
+            $('.result').html('No Result');
+          }
         },
         error: function(xhr, type){
+          console.log(xhr);
+          alert('Ajax error!');
+        }
+      })
+    });
+
+    $('.icd-10-search').click(function(e){
+      e.preventDefault();
+      $('.result').html('Loading...');
+      var icd_10 = $('#icd-10').val();
+      $.ajax({
+        type: 'GET',
+        url: '/icd/10',
+        data: {
+          icd_10: icd_10
+        },
+        dataType: 'json',
+        timeout: 300,
+        context: $('.result'),
+        success: function(data){
+          if (data.length > 0) {            
+            $('.result').html('');
+            var tmp = "";
+            for (var i = data.length - 1; i >= 0; i--) {
+              tmp = "<div>";
+              tmp += "<span class='code'>" + data[i].icd_9_code + "</span> ";
+              tmp += "<span class='code'>" + data[i].icd_10_code + "</span> ";
+              tmp += "<span class='desc'>" + data[i].description + "</span>";
+              $('.result').append(tmp+'<div>');
+            };
+          }else{
+            $('.result').html('No Result');
+          }
+        },
+        error: function(xhr, type){
+          console.log(xhr);
           alert('Ajax error!');
         }
       })
