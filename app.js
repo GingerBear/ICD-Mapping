@@ -14,8 +14,8 @@ app.get('/', function (req, res) {
 });
 
 var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
+  host     : '209.208.27.190',
+  user     : '',
   password : '',
   database: 'icd-mapping'
 });

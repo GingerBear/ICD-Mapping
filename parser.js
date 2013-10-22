@@ -29,7 +29,7 @@ var lineReader = require('line-reader');
 
 var connection = mysql.createConnection({
   host     : 'localhost',
-  user     : 'root',
+  user     : '',
   password : '',
   database: 'icd-mapping'
 });
