@@ -14,8 +14,8 @@ app.get('/', function (req, res) {
 });
 
 var connection = mysql.createConnection({
-  host     : '209.208.27.190',
-  user     : '',
+  host     : 'localhost',
+  user     : 'root',
   password : '',
   database: 'icd-mapping'
 });
@@ -24,17 +24,30 @@ connection.connect();
 
 app.get('/icd/9', function(req, res) {
 
-  var sql = "SELECT icd9_icd10_map.icd_9_code, icd_10.icd_10_code, short_description, long_description AS description, if_header FROM icd9_icd10_map, icd_10 WHERE " + 
+  var sql = "SELECT icd9_icd10_map.icd_9_code, icd_9.description icd_9_description, icd_10.icd_10_code, icd_10.long_description icd_10_description, if_header " + 
+            "FROM icd9_icd10_map, icd_10, icd_9 WHERE " + 
+            "icd9_icd10_map.icd_9_code = icd_9.icd_9_code AND " + 
             "icd9_icd10_map.icd_10_code = icd_10.icd_10_code AND " + 
-            "icd_9_code = " + (req.query.icd_9 || "''");
+            "icd9_icd10_map.icd_9_code = '" + req.query.icd_9 + "'";
 
   console.log(sql);
 
   connection.query(sql, function(err, rows, fields) {
     if (err) throw err;
     if (rows.length > 0) {
+      var icd_9 = rows[0].icd_9_code;
+      var icd_9_description = rows[0].icd_9_description;
+      var icd_10_set = [];
+      for(var key in rows) {
+        icd_10_set.push({
+          icd_10_code: rows[key].icd_10_code,
+          icd_10_description: rows[key].icd_10_description,
+        });
+      }
       res.json({
-        rows: rows,
+        icd_9_code: rows[0].icd_9_code,
+        icd_9_description: rows[0].icd_9_description,
+        icd_10: icd_10_set,
         empty: false
       });
     }else{
@@ -48,17 +61,30 @@ app.get('/icd/9', function(req, res) {
 
 app.get('/icd/10', function(req, res) {
 
-  var sql = "SELECT icd9_icd10_map.icd_10_code, icd_9.icd_9_code, description FROM icd9_icd10_map, icd_9 WHERE " + 
+  var sql = "SELECT icd9_icd10_map.icd_10_code, icd_10.long_description icd_10_description, icd_9.icd_9_code, icd_9.description icd_9_description " + 
+            "FROM icd9_icd10_map, icd_9, icd_10 WHERE " + 
             "icd9_icd10_map.icd_9_code = icd_9.icd_9_code AND " + 
-            "icd_10_code = " + ("'" + req.query.icd_10 + "'" || "''");
+            "icd9_icd10_map.icd_10_code = icd_10.icd_10_code AND " + 
+            "icd9_icd10_map.icd_10_code = '" + req.query.icd_10 + "'";
 
   console.log(sql);
 
   connection.query(sql, function(err, rows, fields) {
     if (err) throw err;
     if (rows.length > 0) {
+      var icd_10 = rows[0].icd_10_code;
+      var icd_10_short_description = rows[0].icd_10_description;
+      var icd_9_set = [];
+      for(var key in rows) {
+        icd_9_set.push({
+          icd_9_code: rows[key].icd_9_code,
+          icd_9_description: rows[key].icd_9_description,
+        });
+      }
       res.json({
-        rows: rows,
+        icd_10_code: rows[0].icd_10_code,
+        icd_10_description: rows[0].icd_10_description,
+        icd_9: icd_9_set,
         empty: false
       });
     }else{
