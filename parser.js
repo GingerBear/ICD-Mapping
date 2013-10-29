@@ -21,6 +21,12 @@
  *   flag varchar(10)
  * }
  * 
+ * icd10_icd9_map {
+ *   icd_10_code varchar(10),
+ *   icd_9_code varchar(10),
+ *   flag varchar(10)
+ * }
+ * 
  */
 
 
@@ -29,8 +35,8 @@ var lineReader = require('line-reader');
 
 var connection = mysql.createConnection({
   host     : 'localhost',
-  user     : 'root',
-  password : 'root',
+  user     : '',
+  password : '',
   database: 'icd-mapping'
 });
 
@@ -69,6 +75,48 @@ connection.connect();
       (function(data, line_count){      
         connection.query('INSERT INTO icd9_icd10_map (icd_9_code, icd_10_code, flag) VALUES ?', [data], function(err, rows, fields) {
           console.log('ICD-9 ICD-10 Mapping inserted: '+ line_count);
+          console.log('ICD-9 ICD-10 Mapping Done!');
+          if (err) throw err;
+        });
+      })(data, line_count);
+      return false; // stop reading
+    }
+  });
+
+})();
+
+(function(){
+
+  var count = 1;
+  var line_count = 1;
+  var rate = 5000;
+  var data = [];
+
+  /*  insert icd-10-cm icd-9-cm mapping table  */
+
+
+  lineReader.eachLine('data/2013_I10gem.txt', function(line, last) {
+
+    data.push([line.substring(0, 8).trim(),
+      line.substring(8, 14).trim(),
+      line.substring(14, 20).trim()
+    ]);
+
+    if(line_count%rate === 0) {
+      (function(data, line_count){      
+        connection.query('INSERT INTO icd10_icd9_map (icd_10_code, icd_9_code, flag) VALUES ?', [data], function(err, rows, fields) {
+          console.log('ICD-10 ICD-9 Mapping inserted: '+ line_count);
+          if (err) throw err;
+        });
+      })(data, line_count);
+      data = [];
+    }
+    line_count++;
+
+    if (last) {
+      (function(data, line_count){      
+        connection.query('INSERT INTO icd10_icd9_map (icd_10_code, icd_9_code, flag) VALUES ?', [data], function(err, rows, fields) {
+          console.log('ICD-10 ICD-9 Mapping inserted: '+ line_count);
           console.log('ICD-9 ICD-10 Mapping Done!');
           if (err) throw err;
         });

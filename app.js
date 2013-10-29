@@ -98,11 +98,11 @@ app.get('/icd/10', function(req, res) {
         icd_10_code = rows[0].icd_10_code;
         icd_10_description = rows[0].icd_10_description;
 
-        var sql = "SELECT icd9_icd10_map.icd_10_code, icd_10.long_description icd_10_description, icd_9.icd_9_code, icd_9.description icd_9_description " + 
-                  "FROM icd9_icd10_map, icd_9, icd_10 WHERE " + 
-                  "icd9_icd10_map.icd_9_code = icd_9.icd_9_code AND " + 
-                  "icd9_icd10_map.icd_10_code = icd_10.icd_10_code AND " + 
-                  "icd9_icd10_map.icd_10_code = '" + query_code + "'";
+        var sql = "SELECT icd10_icd9_map.icd_10_code, icd_10.long_description icd_10_description, icd_9.icd_9_code, icd_9.description icd_9_description " + 
+                  "FROM icd10_icd9_map, icd_9, icd_10 WHERE " + 
+                  "icd10_icd9_map.icd_9_code = icd_9.icd_9_code AND " + 
+                  "icd10_icd9_map.icd_10_code = icd_10.icd_10_code AND " + 
+                  "icd10_icd9_map.icd_10_code = '" + query_code + "'";
 
         console.log(sql);
 
@@ -142,7 +142,7 @@ app.get('/icd/10', function(req, res) {
 
 app.get('/icd/keyword', function(req, res) {
 
-  var keyword = req.query.keyword.trim();
+  var keyword = req.query.keyword.trim().toLowerCase();
   var ret = {
     icd_9: [],
     icd_10: []
@@ -150,11 +150,11 @@ app.get('/icd/keyword', function(req, res) {
 
   var sql9 = "SELECT icd_9.icd_9_code, icd_9.description icd_9_description " + 
             "FROM icd_9 WHERE " + 
-            "icd_9.description LIKE '%" + keyword + "%' LIMIT 30";
+            "LOWER(icd_9.description) LIKE '%" + keyword + "%' LIMIT 30";
 
   var sql10 = "SELECT icd_10.icd_10_code, icd_10.long_description icd_10_description " + 
             "FROM icd_10 WHERE " + 
-            "icd_10.long_description LIKE '%" + keyword + "%' LIMIT 30";
+            "LOWER(icd_10.long_description) LIKE '%" + keyword + "%' LIMIT 30";
 
   console.log(sql9);
   console.log(sql10);
